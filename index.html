@@ -279,6 +279,9 @@
       const formatOutput = document.getElementById("formatOutput");
       const toast = document.getElementById("toast");
 
+            const sanitizeInput = (value) =>
+        value.replace(/[\u200e\u200f\u202a-\u202e]/g, "").trim();
+
       const parseHebrewTimeToMinutes = (rawValue) => {
         const normalized = rawValue
           .replace(/,/g, " ")
@@ -289,48 +292,45 @@
           return null;
         }
 
-        const hoursMatch = normalized.match(/(\d+(?:[.,]\d+)?)\s*שעה(?:ות)?/);
-        const minutesMatch = normalized.match(/(\d+(?:[.,]\d+)?)\s*דק(?:ה|ות)/);
+        const unitRegex = /(\d+(?:[.,]\d+)?)\s*(שעה(?:ות)?|דק(?:ה|ות))/g;
+        const toNumber = (value) => Number(value.replace(",", "."));
 
-        if (!hoursMatch && !minutesMatch) {
+        let hoursTotal = 0;
+        let minutesTotal = 0;
+        let matched = false;
+        let match;
+
+        while ((match = unitRegex.exec(normalized)) !== null) {
+          matched = true;
+          const amount = toNumber(match[1]);
+          if (!Number.isFinite(amount) || amount < 0) {
+            return null;
+          }
+
+          if (match[2].startsWith("שעה")) {
+            hoursTotal += amount;
+          } else {
+            minutesTotal += amount;
+          }
+        }
+
+        if (!matched) {
           return null;
         }
 
-        const toNumber = (value) => Number(value.replace(",", "."));
-        let totalMinutes = 0;
-
-        if (hoursMatch) {
-          const hours = toNumber(hoursMatch[1]);
-          if (!Number.isFinite(hours) || hours < 0) {
-            return null;
-          }
-          totalMinutes += hours * 60;
-        }
-
-        if (minutesMatch) {
-          const minutes = toNumber(minutesMatch[1]);
-          if (!Number.isFinite(minutes) || minutes < 0) {
-            return null;
-          }
-          totalMinutes += minutes;
-        }
-
-        return Math.round(totalMinutes);
+        return Math.round(hoursTotal * 60 + minutesTotal);
       };
 
       const parseTimeToMinutes = (value) => {
-        const raw = value.trim();
+        const raw = sanitizeInput(value);
         if (!raw) {
           return null;
         }
 
-        if (raw.includes(":")) {
-          const parts = raw.split(":");
-          if (parts.length !== 2) {
-            return null;
-          }
-          const hours = Number(parts[0]);
-          const minutes = Number(parts[1]);
+        const hhmmMatch = raw.match(/^(\d+)\s*:\s*(\d{1,2})$/);
+        if (hhmmMatch) {
+          const hours = Number(hhmmMatch[1]);
+          const minutes = Number(hhmmMatch[2]);
           if (!Number.isFinite(hours) || !Number.isFinite(minutes)) {
             return null;
           }
@@ -345,13 +345,25 @@
           return hebrewMinutes;
         }
 
-        const normalized = raw.replace(",", ".");
-        const hours = Number(normalized);
+        const decimalNormalized = raw.replace(/,/g, ".");
+        if (!/^\d+(?:\.\d+)?$/.test(decimalNormalized)) {
+          return null;
+        }
+        const hours = Number(decimalNormalized);
         if (!Number.isFinite(hours) || hours < 0) {
           return null;
         }
         return Math.round(hours * 60);
       };
+
+      /*
+        Examples:
+        parseTimeToMinutes("15") === 900
+        parseTimeToMinutes("7.5") === 450
+        parseTimeToMinutes("7:30") === 450
+        parseTimeToMinutes("6 שעות, 51 דקות") === 411
+        calculateRemainingMinutes(900, parseTimeToMinutes("6 שעות, 51 דקות")) === 489
+      */
 
       const calculateRemainingMinutes = (requiredMinutes, completedMinutes) => {
         return requiredMinutes - completedMinutes;
@@ -458,5 +470,6 @@
     </script>
   </body>
 </html>
+
 
 

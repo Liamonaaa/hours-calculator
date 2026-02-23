@@ -292,7 +292,7 @@
           return null;
         }
 
-        const unitRegex = /(\d+(?:[.,]\d+)?)\s*(שעה(?:ות)?|דק(?:ה|ות))/g;
+        const unitRegex = /(\d+(?:[.,]\d+)?)\s*(שעה|שעות|דק(?:ה|ות))/g;
         const toNumber = (value) => Number(value.replace(",", "."));
 
         let hoursTotal = 0;
@@ -307,7 +307,8 @@
             return null;
           }
 
-          if (match[2].startsWith("שעה")) {
+          const unit = match[2];
+          if (unit === "שעה" || unit === "שעות") {
             hoursTotal += amount;
           } else {
             minutesTotal += amount;
@@ -470,6 +471,7 @@
     </script>
   </body>
 </html>
+
 
 
 

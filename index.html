@@ -279,6 +279,45 @@
       const formatOutput = document.getElementById("formatOutput");
       const toast = document.getElementById("toast");
 
+      const parseHebrewTimeToMinutes = (rawValue) => {
+        const normalized = rawValue
+          .replace(/,/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+
+        if (!normalized) {
+          return null;
+        }
+
+        const hoursMatch = normalized.match(/(\d+(?:[.,]\d+)?)\s*שעה(?:ות)?/);
+        const minutesMatch = normalized.match(/(\d+(?:[.,]\d+)?)\s*דק(?:ה|ות)/);
+
+        if (!hoursMatch && !minutesMatch) {
+          return null;
+        }
+
+        const toNumber = (value) => Number(value.replace(",", "."));
+        let totalMinutes = 0;
+
+        if (hoursMatch) {
+          const hours = toNumber(hoursMatch[1]);
+          if (!Number.isFinite(hours) || hours < 0) {
+            return null;
+          }
+          totalMinutes += hours * 60;
+        }
+
+        if (minutesMatch) {
+          const minutes = toNumber(minutesMatch[1]);
+          if (!Number.isFinite(minutes) || minutes < 0) {
+            return null;
+          }
+          totalMinutes += minutes;
+        }
+
+        return Math.round(totalMinutes);
+      };
+
       const parseTimeToMinutes = (value) => {
         const raw = value.trim();
         if (!raw) {
@@ -299,6 +338,11 @@
             return null;
           }
           return Math.round(hours * 60 + minutes);
+        }
+
+        const hebrewMinutes = parseHebrewTimeToMinutes(raw);
+        if (hebrewMinutes !== null) {
+          return hebrewMinutes;
         }
 
         const normalized = raw.replace(",", ".");
@@ -371,7 +415,7 @@
         const completedMinutes = parseTimeToMinutes(completedRaw);
 
         if (requiredMinutes === null || completedMinutes === null) {
-          setResult("קלט לא תקין. השתמשו בפורמט 7.5 או 7:30", true);
+          setResult("קלט לא תקין. השתמשו בפורמט 7.5, 7:30 או 6 שעות 51 דקות", true);
           formatOutput.textContent = "";
           copyButton.disabled = true;
           return;
@@ -414,4 +458,5 @@
     </script>
   </body>
 </html>
+
 

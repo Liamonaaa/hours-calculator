@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>מחשבון שעות</title>
+    <link rel="icon" href="data:," />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -167,50 +168,6 @@
         box-shadow: 0 0 24px rgba(53, 255, 107, 0.7), 0 10px 34px rgba(11, 56, 22, 0.85);
       }
 
-      .glow-button:disabled {
-        cursor: not-allowed;
-        opacity: 0.55;
-        box-shadow: none;
-      }
-
-      .copy-output {
-        background: #0c1712;
-        border: 1px solid #1f3b2c;
-        border-radius: 16px;
-        padding: 18px;
-        white-space: pre-line;
-        font-size: 0.98rem;
-        color: #d8ffe3;
-      }
-
-      .copy-title {
-        margin: 0 0 8px;
-        font-weight: 600;
-        color: var(--muted);
-      }
-
-      .toast {
-        position: fixed;
-        left: 50%;
-        bottom: 28px;
-        transform: translateX(-50%) translateY(20px);
-        background: #0f1e15;
-        border: 1px solid #2b5a3a;
-        color: var(--text);
-        padding: 10px 18px;
-        border-radius: 999px;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.3s ease, transform 0.3s ease;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-        z-index: 20;
-      }
-
-      .toast.show {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0);
-      }
-
       @media (max-width: 560px) {
         .panel {
           padding: 20px;
@@ -260,24 +217,17 @@
         </div>
 
         <div class="actions">
-          <button class="glow-button" id="copyButton" disabled>העתק פורמט</button>
+          <button class="glow-button" id="resetButton" type="button">איפוס</button>
         </div>
-
-        <div class="copy-title">טקסט מוכן להעתקה</div>
-        <pre class="copy-output" id="formatOutput"></pre>
       </section>
     </main>
-
-    <div id="toast" class="toast" role="status" aria-live="polite">הועתק! הטקסט הועתק ללוח</div>
 
     <script>
       const requiredInput = document.getElementById("requiredInput");
       const completedInput = document.getElementById("completedInput");
       const resultBox = document.getElementById("resultBox");
       const resultValue = document.getElementById("resultValue");
-      const copyButton = document.getElementById("copyButton");
-      const formatOutput = document.getElementById("formatOutput");
-      const toast = document.getElementById("toast");
+      const resetButton = document.getElementById("resetButton");
 
             const sanitizeInput = (value) =>
         value.replace(/[\u200e\u200f\u202a-\u202e]/g, "").trim();
@@ -379,31 +329,17 @@
 
       const buildResultInfo = (remainingMinutes) => {
         if (remainingMinutes === 0) {
-          return { display: "סיימת את היעד", copy: "סיימת את היעד" };
+          return "סיימת את היעד";
         }
         if (remainingMinutes < 0) {
-          const overText = `עברת את היעד ב-${formatMinutesHebrew(remainingMinutes)}`;
-          return { display: overText, copy: overText };
+          return `עברת את היעד ב-${formatMinutesHebrew(remainingMinutes)}`;
         }
-        const remainingText = formatMinutesHebrew(remainingMinutes);
-        return { display: remainingText, copy: remainingText };
-      };
-
-      const buildCopyText = (requiredRaw, completedRaw, resultText) => {
-        return `פורמט שעות\nכמה שעות צריך: ${requiredRaw}\nכמה שעות עשיתי עד עכשיו: ${completedRaw}\nכמה נשאר לי: ${resultText}`;
+        return formatMinutesHebrew(remainingMinutes);
       };
 
       const setResult = (text, isError) => {
         resultValue.textContent = text;
         resultBox.classList.toggle("error", isError);
-      };
-
-      const showToast = () => {
-        toast.classList.add("show");
-        clearTimeout(showToast.timeoutId);
-        showToast.timeoutId = setTimeout(() => {
-          toast.classList.remove("show");
-        }, 2200);
       };
 
       const updateOutput = () => {
@@ -412,15 +348,11 @@
 
         if (!requiredRaw && !completedRaw) {
           setResult("—", false);
-          formatOutput.textContent = "";
-          copyButton.disabled = true;
           return;
         }
 
         if (!requiredRaw || !completedRaw) {
           setResult("נא למלא את שני השדות", true);
-          formatOutput.textContent = "";
-          copyButton.disabled = true;
           return;
         }
 
@@ -429,43 +361,22 @@
 
         if (requiredMinutes === null || completedMinutes === null) {
           setResult("קלט לא תקין. השתמשו בפורמט 7.5, 7:30 או 6 שעות 51 דקות", true);
-          formatOutput.textContent = "";
-          copyButton.disabled = true;
           return;
         }
 
         const remainingMinutes = calculateRemainingMinutes(requiredMinutes, completedMinutes);
-        const resultInfo = buildResultInfo(remainingMinutes);
-
-        setResult(resultInfo.display, false);
-        formatOutput.textContent = buildCopyText(requiredRaw, completedRaw, resultInfo.copy);
-        copyButton.disabled = false;
+        setResult(buildResultInfo(remainingMinutes), false);
       };
 
-      const copyToClipboard = async () => {
-        if (copyButton.disabled) {
-          return;
-        }
-        const text = formatOutput.textContent;
-        try {
-          await navigator.clipboard.writeText(text);
-          showToast();
-        } catch (error) {
-          const temp = document.createElement("textarea");
-          temp.value = text;
-          temp.style.position = "fixed";
-          temp.style.left = "-9999px";
-          document.body.appendChild(temp);
-          temp.select();
-          document.execCommand("copy");
-          document.body.removeChild(temp);
-          showToast();
-        }
+      const resetForm = () => {
+        requiredInput.value = "";
+        completedInput.value = "";
+        updateOutput();
       };
 
       requiredInput.addEventListener("input", updateOutput);
       completedInput.addEventListener("input", updateOutput);
-      copyButton.addEventListener("click", copyToClipboard);
+      resetButton.addEventListener("click", resetForm);
 
       updateOutput();
     </script>

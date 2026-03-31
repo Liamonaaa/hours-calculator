@@ -214,9 +214,28 @@
         margin-bottom: 18px;
       }
 
+      .result-row {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .result-label {
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
       .result strong {
         color: var(--green);
         font-size: 1.35rem;
+      }
+
+      .result strong.is-muted {
+        color: var(--muted);
+      }
+
+      .result strong.is-error {
+        color: var(--danger);
       }
 
       .result.error {
@@ -311,11 +330,23 @@
                 />
                 <span class="helper">לדוגמה: 2.25 = שעתיים ורבע.</span>
               </label>
+
+              <label class="field">
+                <span class="label">תאריך יעד</span>
+                <input id="deadlineInput" class="input" type="date" />
+                <span class="helper">החישוב היומי יתעדכן לפי מספר הימים עד התאריך שבחרתם.</span>
+              </label>
             </div>
 
             <div class="result" id="resultBox">
-              <span>כמה נשאר לי:</span>
-              <strong id="resultValue">—</strong>
+              <div class="result-row">
+                <span class="result-label">כמה נשאר לי:</span>
+                <strong id="resultValue">—</strong>
+              </div>
+              <div class="result-row">
+                <span class="result-label">כמה שעות צריך ביום:</span>
+                <strong id="dailyHoursValue">—</strong>
+              </div>
             </div>
 
             <div class="actions">
@@ -354,8 +385,10 @@
     <script>
       const requiredInput = document.getElementById("requiredInput");
       const completedInput = document.getElementById("completedInput");
+      const deadlineInput = document.getElementById("deadlineInput");
       const resultBox = document.getElementById("resultBox");
       const resultValue = document.getElementById("resultValue");
+      const dailyHoursValue = document.getElementById("dailyHoursValue");
       const resetButton = document.getElementById("resetButton");
       const copyCommandButtons = Array.from(document.querySelectorAll("[data-copy-command]"));
 
@@ -450,11 +483,68 @@
         return requiredMinutes - completedMinutes;
       };
 
+      const getTodayDateString = () => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const day = String(now.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      };
+
+      const parseDateInput = (value) => {
+        const normalized = sanitizeInput(value);
+        if (!normalized) {
+          return null;
+        }
+
+        const match = normalized.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if (!match) {
+          return null;
+        }
+
+        const year = Number(match[1]);
+        const month = Number(match[2]);
+        const day = Number(match[3]);
+        const parsed = new Date(year, month - 1, day);
+
+        if (
+          parsed.getFullYear() !== year ||
+          parsed.getMonth() !== month - 1 ||
+          parsed.getDate() !== day
+        ) {
+          return null;
+        }
+
+        return parsed;
+      };
+
+      const calculateRemainingDays = (deadlineValue) => {
+        const deadlineDate = parseDateInput(deadlineValue);
+        if (!deadlineDate) {
+          return null;
+        }
+
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const deadline = new Date(
+          deadlineDate.getFullYear(),
+          deadlineDate.getMonth(),
+          deadlineDate.getDate(),
+        );
+        const millisecondsPerDay = 24 * 60 * 60 * 1000;
+        return Math.floor((deadline - today) / millisecondsPerDay) + 1;
+      };
+
       const formatMinutesHebrew = (minutes) => {
         const total = Math.abs(minutes);
         const hours = Math.floor(total / 60);
         const mins = total % 60;
         return `${hours} שעות ו-${mins} דקות`;
+      };
+
+      const formatDailyMinutesHebrew = (minutesPerDay) => {
+        const roundedMinutes = Math.ceil(minutesPerDay);
+        return `${formatMinutesHebrew(roundedMinutes)} ליום`;
       };
 
       const buildResultInfo = (remainingMinutes) => {
@@ -472,17 +562,26 @@
         resultBox.classList.toggle("error", isError);
       };
 
+      const setDailyHours = (text, tone = "success") => {
+        dailyHoursValue.textContent = text;
+        dailyHoursValue.classList.toggle("is-muted", tone === "muted");
+        dailyHoursValue.classList.toggle("is-error", tone === "error");
+      };
+
       const updateOutput = () => {
         const requiredRaw = requiredInput.value.trim();
         const completedRaw = completedInput.value.trim();
+        const deadlineRaw = deadlineInput.value.trim();
 
         if (!requiredRaw && !completedRaw) {
           setResult("—", false);
+          setDailyHours("—", "muted");
           return;
         }
 
         if (!requiredRaw || !completedRaw) {
           setResult("נא למלא את שני השדות", true);
+          setDailyHours("—", "muted");
           return;
         }
 
@@ -491,16 +590,41 @@
 
         if (requiredMinutes === null || completedMinutes === null) {
           setResult("קלט לא תקין. השתמשו בפורמט 7.5, 7:30 או 6 שעות 51 דקות", true);
+          setDailyHours("—", "muted");
           return;
         }
 
         const remainingMinutes = calculateRemainingMinutes(requiredMinutes, completedMinutes);
         setResult(buildResultInfo(remainingMinutes), false);
+
+        if (!deadlineRaw) {
+          setDailyHours("בחרו תאריך יעד", "muted");
+          return;
+        }
+
+        const remainingDays = calculateRemainingDays(deadlineRaw);
+        if (remainingDays === null) {
+          setDailyHours("תאריך לא תקין", "error");
+          return;
+        }
+
+        if (remainingMinutes <= 0) {
+          setDailyHours("0 שעות ו-0 דקות ליום");
+          return;
+        }
+
+        if (remainingDays <= 0) {
+          setDailyHours("תאריך היעד עבר", "error");
+          return;
+        }
+
+        setDailyHours(formatDailyMinutesHebrew(remainingMinutes / remainingDays));
       };
 
       const resetForm = () => {
         requiredInput.value = "";
         completedInput.value = "";
+        deadlineInput.value = "";
         updateOutput();
       };
 
@@ -548,11 +672,13 @@
 
       requiredInput.addEventListener("input", updateOutput);
       completedInput.addEventListener("input", updateOutput);
+      deadlineInput.addEventListener("input", updateOutput);
       resetButton.addEventListener("click", resetForm);
       copyCommandButtons.forEach((button) => {
         button.addEventListener("click", handleCommandCopy);
       });
 
+      deadlineInput.min = getTodayDateString();
       updateOutput();
     </script>
   </body>

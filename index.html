@@ -202,56 +202,6 @@
         color: var(--muted);
       }
 
-      .mode-section {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        margin-bottom: 20px;
-      }
-
-      .mode-switch {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-      }
-
-      .mode-option {
-        flex: 1 1 180px;
-      }
-
-      .mode-input {
-        position: absolute;
-        opacity: 0;
-        pointer-events: none;
-      }
-
-      .mode-pill {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 48px;
-        padding: 12px 16px;
-        border-radius: 14px;
-        border: 1px solid rgba(53, 255, 107, 0.18);
-        background: rgba(8, 16, 12, 0.55);
-        color: var(--muted);
-        font-weight: 600;
-        cursor: pointer;
-        transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease,
-          transform 0.2s ease;
-      }
-
-      .mode-input:checked + .mode-pill {
-        border-color: rgba(75, 255, 133, 0.7);
-        background: rgba(20, 42, 28, 0.92);
-        color: var(--text);
-        transform: translateY(-1px);
-      }
-
-      .mode-panel[hidden] {
-        display: none;
-      }
-
       .field.full-span {
         grid-column: 1 / -1;
       }
@@ -409,81 +359,42 @@
                 />
                 <span class="helper">לדוגמה: 2.25 = שעתיים ורבע.</span>
               </label>
-            </div>
+              <label class="field">
+                <span class="label">היום הנוכחי</span>
+                <input
+                  id="currentDayInput"
+                  class="input"
+                  type="text"
+                  placeholder="לדוגמה: יום שלישי או שלישי"
+                  autocomplete="off"
+                />
+                <span class="helper">אפשר לכתוב יום בעברית, עם או בלי המילה "יום".</span>
+              </label>
 
-            <div class="mode-section">
-              <span class="label">איך לחשב את הימים שנשארו</span>
-              <div class="mode-switch" role="radiogroup" aria-label="בחירת מצב חישוב">
-                <label class="mode-option">
-                  <input
-                    class="mode-input"
-                    type="radio"
-                    name="calculationMode"
-                    value="date"
-                    checked
-                  />
-                  <span class="mode-pill">תאריך יעד</span>
-                </label>
-                <label class="mode-option">
-                  <input class="mode-input" type="radio" name="calculationMode" value="weekday" />
-                  <span class="mode-pill">ימי שבוע</span>
-                </label>
-              </div>
-            </div>
+              <label class="field">
+                <span class="label">יום יעד</span>
+                <input
+                  id="targetDayInput"
+                  class="input"
+                  type="text"
+                  placeholder="לדוגמה: ראשון, שישי או שבת"
+                  autocomplete="off"
+                />
+                <span class="helper">נתמכות גם וריאציות נפוצות כמו א׳, ג', חמישי ושבת קודש.</span>
+              </label>
 
-            <div class="mode-panel" id="dateModePanel">
-              <div class="grid">
-                <label class="field">
-                  <span class="label">תאריך יעד</span>
-                  <input id="deadlineInput" class="input" type="date" />
-                  <span class="helper">החישוב היומי יתעדכן לפי מספר הימים עד התאריך שבחרתם.</span>
-                </label>
-              </div>
-            </div>
-
-            <div class="mode-panel" id="weekdayModePanel" hidden>
-              <div class="grid">
-                <label class="field">
-                  <span class="label">היום הנוכחי</span>
-                  <select id="currentDaySelect" class="input">
-                    <option value="0">יום ראשון</option>
-                    <option value="1">יום שני</option>
-                    <option value="2">יום שלישי</option>
-                    <option value="3">יום רביעי</option>
-                    <option value="4">יום חמישי</option>
-                    <option value="5">יום שישי</option>
-                    <option value="6">שבת</option>
-                  </select>
-                  <span class="helper">בחרו מאיזה יום מתחילים לספור.</span>
-                </label>
-
-                <label class="field">
-                  <span class="label">יום יעד</span>
-                  <select id="targetDaySelect" class="input">
-                    <option value="0">יום ראשון</option>
-                    <option value="1">יום שני</option>
-                    <option value="2">יום שלישי</option>
-                    <option value="3">יום רביעי</option>
-                    <option value="4">יום חמישי</option>
-                    <option value="5">יום שישי</option>
-                    <option value="6">שבת</option>
-                  </select>
-                  <span class="helper">החישוב יתקדם קדימה לאורך השבוע עד ליום שבחרתם.</span>
-                </label>
-
-                <label class="field full-span">
-                  <span class="label">אפשרות הכללה</span>
-                  <span class="toggle-card">
-                    <input id="includeTodayInput" type="checkbox" checked />
-                    <span class="toggle-copy">
-                      <span>לכלול את היום הנוכחי בחישוב</span>
-                      <span class="helper">
-                        מסומן = סופרים גם את היום שנבחר. לא מסומן = מתחילים מהיום הבא.
-                      </span>
+              <label class="field full-span">
+                <span class="label">אפשרות הכללה</span>
+                <span class="toggle-card">
+                  <input id="includeTodayInput" type="checkbox" checked />
+                  <span class="toggle-copy">
+                    <span>לכלול את היום הנוכחי בחישוב</span>
+                    <span class="helper">
+                      מסומן = סופרים גם את היום שנבחר. לא מסומן = מתחילים מהיום הבא.
                     </span>
                   </span>
-                </label>
-              </div>
+                </span>
+              </label>
             </div>
 
             <div class="result" id="resultBox">
@@ -533,20 +444,14 @@
     <script>
       const requiredInput = document.getElementById("requiredInput");
       const completedInput = document.getElementById("completedInput");
-      const deadlineInput = document.getElementById("deadlineInput");
-      const currentDaySelect = document.getElementById("currentDaySelect");
-      const targetDaySelect = document.getElementById("targetDaySelect");
+      const currentDayInput = document.getElementById("currentDayInput");
+      const targetDayInput = document.getElementById("targetDayInput");
       const includeTodayInput = document.getElementById("includeTodayInput");
-      const dateModePanel = document.getElementById("dateModePanel");
-      const weekdayModePanel = document.getElementById("weekdayModePanel");
       const resultBox = document.getElementById("resultBox");
       const resultValue = document.getElementById("resultValue");
       const dailyHoursValue = document.getElementById("dailyHoursValue");
       const resetButton = document.getElementById("resetButton");
       const copyCommandButtons = Array.from(document.querySelectorAll("[data-copy-command]"));
-      const calculationModeInputs = Array.from(
-        document.querySelectorAll('input[name="calculationMode"]'),
-      );
 
       const sanitizeInput = (value) =>
         value.replace(/[\u200e\u200f\u202a-\u202e]/g, "").trim();
@@ -639,61 +544,80 @@
         return requiredMinutes - completedMinutes;
       };
 
-      const getTodayDateString = () => {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, "0");
-        const day = String(now.getDate()).padStart(2, "0");
-        return `${year}-${month}-${day}`;
-      };
+      const weekdayAliases = new Map([
+        ["0", 0],
+        ["1", 1],
+        ["2", 2],
+        ["3", 3],
+        ["4", 4],
+        ["5", 5],
+        ["6", 6],
+        ["א", 0],
+        ["א׳", 0],
+        ["א'", 0],
+        ["אחד", 0],
+        ["ראשון", 0],
+        ["יוםראשון", 0],
+        ["ב", 1],
+        ["ב׳", 1],
+        ["ב'", 1],
+        ["שני", 1],
+        ["יוםשני", 1],
+        ["ג", 2],
+        ["ג׳", 2],
+        ["ג'", 2],
+        ["שלישי", 2],
+        ["יוםשלישי", 2],
+        ["ד", 3],
+        ["ד׳", 3],
+        ["ד'", 3],
+        ["רביעי", 3],
+        ["יוםרביעי", 3],
+        ["ה", 4],
+        ["ה׳", 4],
+        ["ה'", 4],
+        ["חמישי", 4],
+        ["יוםחמישי", 4],
+        ["ו", 5],
+        ["ו׳", 5],
+        ["ו'", 5],
+        ["שישי", 5],
+        ["יוםשישי", 5],
+        ["ש", 6],
+        ["ש׳", 6],
+        ["ש'", 6],
+        ["שבת", 6],
+        ["שבתקודש", 6],
+        ["יוםשבת", 6],
+      ]);
 
-      const parseDateInput = (value) => {
-        const normalized = sanitizeInput(value);
+      const normalizeWeekdayInput = (value) => {
+        const normalized = sanitizeInput(value)
+          .toLowerCase()
+          .replace(/\s+/g, "")
+          .replace(/[״"]/g, "")
+          .replace(/[׳']/g, "'")
+          .replace(/^יום(?=ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)/, "יום");
+
         if (!normalized) {
           return null;
         }
 
-        const match = normalized.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-        if (!match) {
-          return null;
+        if (weekdayAliases.has(normalized)) {
+          return weekdayAliases.get(normalized);
         }
 
-        const year = Number(match[1]);
-        const month = Number(match[2]);
-        const day = Number(match[3]);
-        const parsed = new Date(year, month - 1, day);
-
-        if (
-          parsed.getFullYear() !== year ||
-          parsed.getMonth() !== month - 1 ||
-          parsed.getDate() !== day
-        ) {
-          return null;
+        const withoutPrefix = normalized.replace(/^יום/, "");
+        if (weekdayAliases.has(withoutPrefix)) {
+          return weekdayAliases.get(withoutPrefix);
         }
 
-        return parsed;
-      };
-
-      const calculateRemainingDays = (deadlineValue) => {
-        const deadlineDate = parseDateInput(deadlineValue);
-        if (!deadlineDate) {
-          return null;
-        }
-
-        const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const deadline = new Date(
-          deadlineDate.getFullYear(),
-          deadlineDate.getMonth(),
-          deadlineDate.getDate(),
-        );
-        const millisecondsPerDay = 24 * 60 * 60 * 1000;
-        return Math.floor((deadline - today) / millisecondsPerDay) + 1;
+        return null;
       };
 
       const calculateWeekdayRemainingDays = (currentDayValue, targetDayValue, includeToday) => {
-        const currentDay = Number(currentDayValue);
-        const targetDay = Number(targetDayValue);
+        const currentDay = normalizeWeekdayInput(currentDayValue);
+        const targetDay = normalizeWeekdayInput(targetDayValue);
 
         if (
           !Number.isInteger(currentDay) ||
@@ -747,43 +671,15 @@
         dailyHoursValue.classList.toggle("is-error", tone === "error");
       };
 
-      const getCalculationMode = () => {
-        const selectedMode = calculationModeInputs.find((input) => input.checked);
-        return selectedMode ? selectedMode.value : "date";
-      };
+      const resolveRemainingDays = () => {
+        const remainingDays = calculateWeekdayRemainingDays(
+          currentDayInput.value,
+          targetDayInput.value,
+          includeTodayInput.checked,
+        );
 
-      const syncModeVisibility = () => {
-        const calculationMode = getCalculationMode();
-        dateModePanel.hidden = calculationMode !== "date";
-        weekdayModePanel.hidden = calculationMode !== "weekday";
-      };
-
-      const resolveRemainingDays = (calculationMode, deadlineRaw) => {
-        if (calculationMode === "weekday") {
-          const remainingDays = calculateWeekdayRemainingDays(
-            currentDaySelect.value,
-            targetDaySelect.value,
-            includeTodayInput.checked,
-          );
-
-          if (remainingDays === null) {
-            return { errorText: "בחירת ימים לא תקינה", tone: "error" };
-          }
-
-          return { remainingDays };
-        }
-
-        if (!deadlineRaw) {
-          return { errorText: "בחרו תאריך יעד", tone: "muted" };
-        }
-
-        const remainingDays = calculateRemainingDays(deadlineRaw);
         if (remainingDays === null) {
-          return { errorText: "תאריך לא תקין", tone: "error" };
-        }
-
-        if (remainingDays <= 0) {
-          return { errorText: "תאריך היעד עבר", tone: "error" };
+          return { errorText: "הזינו ימי שבוע תקינים", tone: "error" };
         }
 
         return { remainingDays };
@@ -792,8 +688,6 @@
       const updateOutput = () => {
         const requiredRaw = requiredInput.value.trim();
         const completedRaw = completedInput.value.trim();
-        const deadlineRaw = deadlineInput.value.trim();
-        const calculationMode = getCalculationMode();
 
         if (!requiredRaw && !completedRaw) {
           setResult("—", false);
@@ -824,7 +718,7 @@
           return;
         }
 
-        const daysResolution = resolveRemainingDays(calculationMode, deadlineRaw);
+        const daysResolution = resolveRemainingDays();
         if (daysResolution.errorText) {
           setDailyHours(daysResolution.errorText, daysResolution.tone);
           return;
@@ -836,15 +730,9 @@
       const resetForm = () => {
         requiredInput.value = "";
         completedInput.value = "";
-        deadlineInput.value = "";
-        const todayWeekday = String(new Date().getDay());
-        currentDaySelect.value = todayWeekday;
-        targetDaySelect.value = todayWeekday;
+        currentDayInput.value = "";
+        targetDayInput.value = "";
         includeTodayInput.checked = true;
-        calculationModeInputs.forEach((input) => {
-          input.checked = input.value === "date";
-        });
-        syncModeVisibility();
         updateOutput();
       };
 
@@ -892,26 +780,14 @@
 
       requiredInput.addEventListener("input", updateOutput);
       completedInput.addEventListener("input", updateOutput);
-      deadlineInput.addEventListener("input", updateOutput);
-      currentDaySelect.addEventListener("change", updateOutput);
-      targetDaySelect.addEventListener("change", updateOutput);
+      currentDayInput.addEventListener("input", updateOutput);
+      targetDayInput.addEventListener("input", updateOutput);
       includeTodayInput.addEventListener("change", updateOutput);
-      calculationModeInputs.forEach((input) => {
-        input.addEventListener("change", () => {
-          syncModeVisibility();
-          updateOutput();
-        });
-      });
       resetButton.addEventListener("click", resetForm);
       copyCommandButtons.forEach((button) => {
         button.addEventListener("click", handleCommandCopy);
       });
 
-      const todayWeekday = String(new Date().getDay());
-      currentDaySelect.value = todayWeekday;
-      targetDaySelect.value = todayWeekday;
-      deadlineInput.min = getTodayDateString();
-      syncModeVisibility();
       updateOutput();
     </script>
   </body>

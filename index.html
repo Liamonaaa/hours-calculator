@@ -625,11 +625,16 @@
         }
 
         const dayDifference = (targetDay - currentDay + 7) % 7;
+        
+        if (dayDifference === 0) {
+          return 7;
+        }
+
         if (includeToday) {
           return dayDifference + 1;
         }
 
-        return dayDifference === 0 ? 7 : dayDifference;
+        return dayDifference;
       };
 
       const formatMinutesHebrew = (minutes) => {
